@@ -1,0 +1,124 @@
+SELECT		seniority,
+		judge,
+		sum(open_case)::INTEGER open_case,
+		sum(md_type)::INTEGER md_type,
+		sum(mdl)::INTEGER mdl,
+		(sum(open_case) - NVL(sum(mdl),0) - NVL(sum(patentR),0) - NVL(sum(relMDL),0))::INTEGER non_mdl,
+		sum(class_action)::INTEGER class_action,
+		(sum(patentA) - NVL(sum(patentR),0))::INTEGER patentL,
+		sum(patentR)::INTEGER patentR,
+		sum(patentN)::INTEGER patentN,
+		sum(patentA)::INTEGER patentA,
+		sum(ss)::INTEGER ss,
+		sum(c2254)::INTEGER c2254,
+		sum(c1983)::INTEGER c1983,
+		sum(deathP)::INTEGER deathP,
+		sum(relMDL)::INTEGER relMDL
+FROM		casd_stats_seniority,
+		OUTER
+		(
+		SELECT		jd_jdprid_ptr,
+				1 AS open_case,
+				NULL::INTEGER AS md_type,
+				NULL::INTEGER AS mdl,
+				CASE WHEN j5_class_action IN ('g','y') THEN 1 ELSE NULL::INTEGER END AS class_action,
+				CASE WHEN j5_nature_of_suit = 830 and j5_caseid in (select cf_caseid from case_flags where cf_value in ('LEAD','LNP')) THEN 1 ELSE NULL::INTEGER END AS patentL,
+				CASE WHEN j5_nature_of_suit = 830 and j5_caseid in (select cf_caseid from case_flags where cf_value in ('LNO')) THEN 1 ELSE NULL::INTEGER END AS patentR,
+				CASE WHEN j5_nature_of_suit = 830 and j5_caseid not in (select cf_caseid from case_flags where cf_value in ('LNO', 'LEAD', 'LNP')) THEN 1 ELSE NULL::INTEGER END AS patentN,
+				CASE WHEN j5_nature_of_suit = 830 THEN 1 ELSE NULL::INTEGER END AS patentA,
+				CASE WHEN j5_nature_of_suit IN (861,862,863,864,865) THEN 1 ELSE NULL::INTEGER END AS ss,
+				CASE WHEN j5_cause = '28:2254' THEN 1 ELSE NULL::INTEGER END AS c2254,
+				CASE WHEN j5_cause = '42:1983pr' THEN 1 ELSE NULL::INTEGER END AS c1983,
+				CASE WHEN j5_nature_of_suit = 535 THEN 1 ELSE NULL::INTEGER END AS deathP,
+				CASE WHEN j5_nature_of_suit = 367 and jd_last_name IN ('Battaglia','Dembin') THEN 1 ELSE NULL::INTEGER END AS relMDL
+		FROM		js56, u_judge
+		WHERE		jd_caseid = j5_caseid
+		AND		jd_date_start <= date(?) AND (jd_date_end IS NULL OR jd_date_end > date(?))
+		AND		j5_date_filed <= date(?) AND (j5_date_term IS NULL OR j5_date_term > date(?))
+		AND		(j5_date_term is null or (jd_date_start <= j5_date_term and (jd_date_end is null or jd_date_end > j5_date_term)))
+		AND		jd_judge_role = 'ref'
+		UNION ALL
+		SELECT          jd_jdprid_ptr,
+				NULL::INTEGER AS open_case,
+				1 AS md_type,
+				NULL::INTEGER AS mdl,							
+				NULL::INTEGER AS class_action,
+				NULL::INTEGER AS patentL,
+				NULL::INTEGER AS patentR,
+				NULL::INTEGER AS patentN,
+				NULL::INTEGER AS patentA,
+				NULL::INTEGER AS ss,
+				NULL::INTEGER AS c2254,
+				NULL::INTEGER AS c1983,
+				NULL::INTEGER AS deathP,
+				NULL::INTEGER AS relMDL
+		FROM		u_judge, u_case
+		WHERE		cs_caseid = jd_caseid
+		AND		cs_type = 'md'
+		AND		jd_date_start <= date(?) AND (jd_date_end IS NULL OR jd_date_end > date(?))
+		AND		jd_ao_code[3] between 'A' and 'Z'
+		AND		jd_judge_role = 'ref'
+		AND		cs_date_term is NULL
+		UNION ALL
+		SELECT		jd_jdprid_ptr,
+				NULL::INTEGER AS open_case,
+				NULL::INTEGER AS md_type,
+				1 AS mdl,
+				NULL::INTEGER AS class_action,
+				NULL::INTEGER AS patentL,
+				NULL::INTEGER AS patentR,
+				NULL::INTEGER AS patentN,
+				NULL::INTEGER AS patentA,
+				NULL::INTEGER AS ss,
+				NULL::INTEGER AS c2254,
+				NULL::INTEGER AS c1983,
+				NULL::INTEGER AS deathP,
+				NULL::INTEGER AS relMDL
+		FROM		js56 AS md, u_judge, u_case, u_asccase, js56 AS asc
+		WHERE		md.j5_caseid = cs_caseid
+		AND		md.j5_caseid = as_lead_caseid
+		AND		cs_caseid = as_lead_caseid
+		AND		as_caseid = jd_caseid
+		AND		as_caseid = asc.j5_caseid
+		AND		jd_caseid = asc.j5_caseid
+		AND		cs_type = 'md'
+		AND		md.j5_date_filed <= date(?) AND (md.j5_date_term IS NULL OR md.j5_date_term > date(?))
+		AND		asc.j5_date_filed <= date(?) AND (asc.j5_date_term IS NULL OR asc.j5_date_term > date(?))
+		AND		jd_date_start <= date(?) AND (jd_date_end IS NULL OR jd_date_end > date(?))
+		AND		jd_ao_code[3] between 'A' and 'Z'
+		AND		jd_judge_role = 'ref'
+		UNION ALL
+		SELECT		jd_jdprid_ptr,
+				NULL::INTEGER AS open_case,
+				NULL::INTEGER AS md_type,
+				1 AS mdl,
+				NULL::INTEGER AS class_action,
+				NULL::INTEGER AS patentL,
+				NULL::INTEGER AS patentR,
+				NULL::INTEGER AS patentN,
+				NULL::INTEGER AS patentA,
+				NULL::INTEGER AS ss,
+				NULL::INTEGER AS c2254,
+				NULL::INTEGER AS c1983,
+				NULL::INTEGER AS deathP,
+				NULL::INTEGER AS relMDL
+		FROM		js56, u_judge, u_asccase
+		WHERE		j5_caseid = as_caseid
+		AND		j5_caseid = jd_caseid
+		AND		j5_date_filed <= date(?) AND (j5_date_term IS NULL OR j5_date_term > date(?))
+		AND		jd_date_start <= date(?) AND (jd_date_end IS NULL OR jd_date_end > date(?))
+		AND		jd_ao_code[3] between 'A' and 'Z'
+		AND		jd_judge_role = 'ref'
+		AND		as_caseid IN (
+						SELECT		as_member_caseid
+						FROM		u_asccase, u_case, js56
+						WHERE		cs_caseid = j5_caseid
+						AND		as_member_caseid = cs_caseid
+						AND		cs_type = 'md'
+						AND		j5_date_filed <= date(?) AND (j5_date_term IS NULL OR j5_date_term > date(?))
+				)
+		)
+WHERE		prid = jd_jdprid_ptr
+AND		judge_type = 'MJ'
+GROUP BY	seniority, judge
+ORDER BY	seniority;
