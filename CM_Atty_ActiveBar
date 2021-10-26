@@ -1,0 +1,11 @@
+select	get_person_name(pr_first_name, pr_middle_name, pr_last_name) pr_name,
+	bm_bar_status,
+	bm_method,
+	bm_bar_number,
+	bm_admission_date
+from   	person, bar_member
+where	bm_admission_date >= date(?) 
+and	bm_admission_date <= date(?)   	
+and	bm_bar_status = 'Active'
+and	pr_type = 'aty'
+and	bm_pr_prid = pr_prid;
