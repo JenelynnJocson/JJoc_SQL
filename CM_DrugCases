@@ -1,0 +1,20 @@
+select  	distinct cs_caseid,  	
+	cs_sort_case_numb,
+	cs_date_filed,
+       	py_def_num,
+	cs_date_filed,     
+	get_person_name(py_first_name, py_middle_name, py_last_name) party_name,
+	cn_count,
+	cn_citation,
+	cn_cittext
+from    	case, party, count
+where	cs_date_filed >= date(?) 
+and	cs_date_filed < date(?)
+and	cs_type = 'cr'
+and	cn_count = '1'
+and	cn_citation like '21:952%'
+and 	py_def_num = cs_def_num
+and     	py_alias_type is NULL
+and	cs_caseid = py_caseid
+and	cs_caseid = cn_caseid
+order by        cs_sort_case_numb, cs_caseid;
