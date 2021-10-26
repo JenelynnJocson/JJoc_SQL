@@ -1,0 +1,32 @@
+select	distinct cs_caseid,  	
+	cs_sort_case_numb,
+	cs_short_title,
+	cs_date_filed,
+	cs_date_term,
+        	pr_last_name,
+	dt_text,
+	dp_date_filed,
+	j5_nature_of_suit,
+	jd_last_name,
+	dp_date_filed
+from	case, js56, judge, dkttext, dktpart, dktentry, person
+where	cs_date_filed >= date('01/01/1970')
+and	cs_date_filed <= date(today)
+and	( cs_date_term is NULL OR j5_date_term is NULL OR (j5_date_term_enter <= j5_date_enter AND cs_date_term is NULL))
+and	cs_type = 'cv'
+and	jd_judge_role = 'pre'
+and	jd_date_end is NULL
+and	dp_type in ('motion','order','notice','utility','misc','respoth','answer','respm')
+
+and	(dt_text like 'ANSWER%Habeas%' OR dt_text like 'Answer%Habeas%' OR dt_text like '%ANSWER to Complaint%' OR dt_text like '%RESPONSE%Habeas%' OR dt_text like '%RESPONSE%Petition%' OR dt_text like 'TRAVERSE%' OR dt_text like 'Traverse%' OR dt_text like '%MOTION to Dismiss%' OR dt_text like 'Motion to Dismiss%' OR dt_text like 'RESPONSE%Dismiss%' OR dt_text like 'Response%Dismiss%' OR dt_text like 'OPPOSITION%Dismiss%' OR dt_text like 'Opposition%Dismiss%' OR dt_text like 'REPLY%Motion to Dismiss%' OR dt_text like 'REPLY%Habeas%' OR dt_text like 'Order Setting Briefing Schedule%Habeas%' OR dt_text like '(1) Order %Setting Briefing Schedule%' OR dt_text like 'ORDER %Setting Briefing Schedule%Habeas%' OR dt_text like 'Order%Setting Briefing Schedule%Petition%' OR dt_text like '%ORDER requiring%' OR dt_text like '%ORDER Requiring%' OR dt_text like '%Order Requiring%' OR dt_text like 'REPORT AND RECOMMENDATION%'  OR dt_text like 'Amended REPORT AND RECOMMENDATION%' OR dt_text like 'OBJECTION%REPORT%' OR dt_text like 'Objection%Report%' OR dt_text like 'OBJECTION%Report%' OR dt_text like 'Objection%REPORT%' OR dt_text like 'ORDER%Report and Recommendation%' OR dt_text like 'Order%Report and Recommendation%' OR dt_text like 'ORDER%REPORT AND RECOMMENDATION%' OR dt_text like 'Order%REPORT AND RECOMMENDATION%' OR dt_text like 'MOTION%Certificate of Appealability%' OR dt_text like 'Motion%Certificate of Appealability%' OR dt_text like 'MOTION%Reconsideration%' OR dt_text like 'Motion%Reconsideration%' OR dt_text like 'Respondent%filed%' OR dt_text like 'ORDER%Respondent must file%' OR dt_text like 'Petitioner%filed%' OR dt_text like '(Court only)%' OR dt_text like 'Notice of Opportunity%' OR dt_text like 'ORDER%Stay%' OR dt_text like 'Reply%Report and Recommendation%' OR dt_text like 'ORDER%Stay%' OR dt_text like 'ORDER%Supplemental Petition%' OR dt_text like '%MOTION for Judgment%')
+and	(dt_text NOT like '%MOTION for Extension%' AND dt_text NOT like '%Lodgment%')
+and	j5_nature_of_suit in ('530')
+and	dt_deseqnoptr = de_seqno
+and	dp_deseqno_ptr = de_seqno
+and	pr_prid = cs_refjud_prid_ptr
+and	cs_caseid = j5_caseid
+and	cs_caseid = jd_caseid
+and	cs_caseid = dp_caseid
+and	cs_caseid = dt_caseid
+and	cs_caseid = de_caseid
+order by	jd_last_name,cs_sort_case_numb,cs_caseid,dp_date_filed;
