@@ -1,0 +1,72 @@
+# DktTimeDS
+
+select 	distinct de_type,
+        de_document_num,
+        de_date_filed,
+        date(de_date_enter) de_date_enter,
+        date(de_date_enter) - date(de_date_filed) days_late,
+        de_who_entered,
+        pr_last_name,
+        NVL(trim(pr_first_name), 'No First Name') || ' ' || trim(pr_last_name) full_name,
+        cs_office,
+        co_translation,
+        cs_case_number,
+        cs_type,
+cs_judprid_ptr, cs_judge_inits,
+        count(no_date) no_work,
+        round((date(de_date_enter) - date(de_date_filed)) - count(no_date)) work_days
+from	u_dktentry, 
+     	outer notworking, 
+     	u_person, 
+     	u_case, 
+     	codes
+where 	no_date between de_date_filed and de_date_enter
+and 	cs_caseid = de_caseid
+and 	de_date_enter >= date(?)
+and 	de_date_enter < date(?)
+and 	de_who_entered = pr_prid
+and 	pr_type = 'crt'
+and 	cs_office = co_code
+and 	co_type = 'office' 
+group by de_caseid,
+        de_seqno,
+        de_type,
+        de_document_num,
+        de_date_filed,
+        de_date_enter,
+        de_who_entered,
+        pr_prid,
+        pr_last_name,
+        pr_first_name,
+        pr_initials,
+        pr_office,
+        cs_office,
+        co_translation,
+        cs_case_number,
+        cs_short_title,
+        cs_caseid,
+        cs_type, cs_judprid_ptr, cs_judge_inits
+order by date(de_date_enter), pr_last_name, cs_case_number
+
+# UsersListDS
+
+select distinct pr_prid,
+ NVL(trim(pr_first_name), 'No First Name') || ' ' || trim(pr_last_name) full_name,
+pr_last_name
+from u_person 
+where pr_type = 'crt'
+and pr_date_end is null
+and pr_first_name <> '' 
+and pr_initials is not null
+order by full_name
+
+# JudgeListDS
+
+select distinct pr_prid,
+ NVL(trim(pr_first_name), 'No First Name') || ' ' || trim(pr_last_name) full_name,
+pr_last_name,
+pr_initials,
+pr_ao_code
+from u_person 
+where pr_type = 'jud'
+order by pr_last_name
