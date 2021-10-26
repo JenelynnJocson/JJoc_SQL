@@ -1,0 +1,30 @@
+select	distinct cs_caseid,  	
+	cs_sort_case_numb,
+	cs_date_filed,
+        	py_def_num,  
+	get_person_name(py_first_name, py_middle_name, py_last_name) party_name,
+	py_seqno,
+        	at_party_seqno,
+        	get_person_name(at_first_name, at_middle_name, at_last_name) attorney,
+	at_designation,
+	at_start_date,
+	at_end_date,
+	cf_value
+from    	case, party, attorney, case_flags
+where	cs_date_filed >= date(?) 
+and	cs_date_filed < date(?)
+and	cs_type = 'cr'
+and	cs_date_term is NULL
+and	py_def_num != 8888
+and	py_role = 'dft'
+and	py_alias_type is NULL
+and 	at_last_name not like 'U S Attorney%'
+and 	at_last_name not like 'Federal Defenders%'
+and	at_party_seqno != 9999
+and	at_party_seqno = py_seqno
+and	at_end_date is NULL
+and	cf_value = 'COMPLEX'
+and	cs_caseid = cf_caseid
+and	cs_caseid = at_caseid
+and	cs_caseid = py_caseid
+order by        cs_sort_case_numb, cs_caseid;
