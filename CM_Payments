@@ -1,0 +1,23 @@
+select distinct ff_caseid,
+        ff_date_paid,
+        ff_type,
+        ff_amount,
+        ff_group_trans_id,
+        ff_payment_type,
+        get_person_name
+(pr_last_name,pr_first_name,pr_middle_name,pr_generation) party_name,
+        cs_case_number,
+        cs_office,
+	dp_type,
+	dp_sub_type,
+	bm_method,
+ff_receipt_num
+from    filing_fee, person, outer case, outer u_dktpart, outer bar_member
+where   ff_person_ptr = pr_prid
+and     	ff_caseid = cs_caseid
+and	ff_caseid = dp_caseid
+and	ff_receipt_num = dp_receipt_no
+and	pr_prid = bm_pr_prid 
+and     	ff_date_paid + INTERVAL (3) HOUR TO HOUR >= date(?) and ff_date_paid + INTERVAL (3) HOUR TO HOUR <= date(?) + 1
+and dp_sub_type != 'motsubpq'
+--order by cs_office, ff_group_trans_id, pr_last_name;
