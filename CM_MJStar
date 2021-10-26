@@ -1,0 +1,45 @@
+select  get_person_name(pr_first_name,pr_middle_name,pr_last_name) judge_name,
+        pr_last_name,
+        cs_case_number,
+        'Preliminary Exam' pre_exam,
+        tc_date_held,
+        tc_hrs,
+        tc_min,
+        tc_date_concluded,
+        ' ' type ,
+        ' '  subtype,
+        cs_sort_case_numb
+from    time_in_court, u_person, u_case
+where   pr_prid = tc_person_ptr
+and     (cs_date_merge is null or cs_date_merge > MDY(month(TODAY),1,year((current - 1 units month))) - 1)
+and     cs_type = 'cr'
+and     tc_hearing_type in ('pe')
+and     tc_date_held between MDY(month((current - 1 units month)),1,year((current - 1 units month)))
+and     MDY(month(TODAY),1,year((current - 1 units month))) - 1
+and     cs_caseid = tc_caseid
+
+UNION
+
+select  get_person_name(pr_first_name,pr_middle_name,pr_last_name) judge_name,
+        pr_last_name,
+        cs_case_number,
+        'Preliminary Exam' pre_exam,
+        tc_date_held,
+        tc_hrs,
+        tc_min,
+        tc_date_concluded,
+        dp_type type,
+        dp_sub_type subtype,
+        cs_sort_case_numb
+from    time_in_court, u_person, u_case, u_dktpart
+where   pr_prid = tc_person_ptr
+and     (cs_date_merge is null or cs_date_merge > MDY(month(TODAY),1,year((current - 1 units month))) - 1)
+and     cs_type = 'mj'
+and     tc_hearing_type in ('pe')
+and     tc_date_held between MDY(month((current - 1 units month)),1,year((current - 1 units month)))
+and     MDY(month(TODAY),1,year((current - 1 units month))) - 1
+and     dp_type in ('minutes-cr')
+and     dp_sub_type in ('prlxm','rmvid')
+and     cs_caseid = tc_caseid
+and     cs_caseid = dp_caseid
+order   by pr_last_name, tc_date_held, cs_sort_case_numb;
