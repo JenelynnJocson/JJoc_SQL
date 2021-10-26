@@ -1,0 +1,6 @@
+select	co_type,
+	co_translation,
+	co_code,
+	co_misc
+from   	codes
+where   	co_type = 'nsuit'
