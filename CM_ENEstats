@@ -1,0 +1,21 @@
+select  	get_person_name(pr_first_name,pr_middle_name,pr_last_name) judge_name,
+                cs_case_number,
+                cs_date_filed,
+                cs_date_term,
+        	sd_dtset,
+	sd_type,
+	sd_judge_prid,
+        	cs_sort_case_numb,
+                j5_disp_method,
+                j5_class_action,
+                j5_nature_of_suit
+from    	schedule, person, case, js56
+where   	cs_type in ('cv')
+and     	sd_dtset >= date(?) 
+and	sd_dtset <= date(?)
+and          j5_date_end is NULL
+and         pr_prid = sd_judge_prid
+and	sd_type = 'ene'
+and     	cs_caseid = sd_caseid
+and	cs_caseid = j5_caseid
+order   	by cs_sort_case_numb, sd_dtset, pr_last_name;
