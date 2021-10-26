@@ -1,0 +1,16 @@
+select  	get_person_name(pr_first_name,pr_middle_name,pr_last_name) judge_name,
+        	pr_last_name,
+        	cs_case_number,
+        	tc_date_held,
+	tc_hearing_type,
+        	tc_hrs,
+        	tc_min,
+        	tc_date_concluded,
+        	cs_sort_case_numb
+from    	time_in_court, person, case
+where   	pr_prid = tc_person_ptr
+and     	cs_type in ('cv')
+and     	tc_date_held >= date(?) 
+and	tc_date_held <= date(?)
+and     	cs_caseid = tc_caseid
+order   	by pr_last_name, tc_date_held, cs_sort_case_numb;
