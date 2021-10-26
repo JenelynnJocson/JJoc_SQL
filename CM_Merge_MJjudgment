@@ -1,0 +1,38 @@
+select  	distinct cs_number,
+	cs_year,
+	cs_type,
+	cs_office,
+        	sd_dtset,
+        	sd_dtsatis,
+	sd_judge_prid,
+        	cs_date_filed,
+        	cs_date_term,
+	jd_last_name,
+	py_def_num,
+	py_prisoner_id,  
+	get_person_name(py_first_name, py_middle_name, py_last_name) party_name,
+	get_person_name(at_first_name, at_middle_name, at_last_name) attorney_name,
+	cn_count,
+	cn_cittext
+from    	case, schedule, judge, party, count, attorney
+where   	sd_class = 'hrg'
+and     	sd_type in ('cphrg','stathrg','statcnf','ia','zzia')
+and	jd_date_end is NULL
+and	cn_count = '0'
+and	cs_type = 'mj'
+and	cs_date_term is NULL
+and	py_def_num != 8888
+and	py_role = 'dft'
+and	py_alias_type is NULL
+and	cn_cittext like '%8:1325%'
+and	sd_dtset = date(?) 
+and	sd_judge_prid = (?)
+and	at_end_date is NULL
+and	at_party_seqno = py_seqno
+and	cs_caseid = at_caseid
+and     	sd_caseid = cs_caseid
+and     	cs_caseid = jd_caseid
+and	cs_caseid = py_caseid
+and	cs_caseid = cn_caseid
+and	cs_caseid = jd_caseid
+order by cs_number; 
