@@ -1,6 +1,6 @@
 👋 Hi, I’m @JenelynnJocson
 
-# SQL-Code
+# JJoc_SQL
 
 This repository will include code or documents related to SQL.
 
