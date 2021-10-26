@@ -1,0 +1,40 @@
+select	distinct cs_caseid,  	
+	cs_sort_case_numb,
+	ccn_violation_number,
+	ccn_collateral_amount,
+	cn_citation,
+	cn_cittext,
+	py_first_name, 
+	py_middle_name, 
+	py_last_name,
+	py_address1,
+	py_city,
+	py_state,
+	py_zip,
+	ccd_violation_location,
+	sd_dtset,
+	sd_dtsatis,
+	sd_type,
+	jd_last_name,
+	cs_date_filed
+from	cvb_count, count, case, party, cvb_case_data, schedule, judge
+where	sd_dtset >= date(?)
+and	sd_dtset <= date(?)
+and	cs_type = 'po'
+and	cs_date_term is NULL
+and	py_role = 'dft'
+and	sd_type in ('ia','statcnf')
+and	sd_date_term is NULL
+and	sd_dtsatis is NULL
+and	jd_judge_role = 'pre'
+and	jd_date_end is NULL
+and	jd_last_name != 'Montenegro'
+and	cs_caseid = jd_caseid
+and	cs_caseid = sd_caseid
+and	cs_caseid = ccn_caseid
+and	cs_caseid = cn_caseid
+and	cs_caseid = cn_caseid
+and	cs_caseid = py_caseid
+and	cs_caseid = ccd_caseid
+and	cn_seqno = ccn_seqno
+order by py_last_name, sd_dtset, ccd_violation_location, cs_sort_case_numb;
